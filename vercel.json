@@ -1,0 +1,22 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "app.py",
+            "use": "@vercel/python"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "app.py"
+        }
+    ],
+    "env": {
+        "FLASK_ENV": "production",
+        "FLASK_DEBUG": "0",
+        "ALLOWED_ORIGINS": "*",
+        "RATE_LIMIT_PER_MINUTE": "10",
+        "PYTHONIOENCODING": "utf-8"
+    }
+}
