@@ -24,27 +24,20 @@ from logging.handlers import RotatingFileHandler
 # 创建 Flask 应用实例
 app = Flask(__name__)
 # 生产环境应该限制 CORS
-CORS(app, resources={
-    r"/api/*": {
-        "origins": os.getenv('ALLOWED_ORIGINS', '*').split(',')  # 默认允许所有来源
-    }
-})
+CORS(app)
 
 # 添加请求限制
 limiter = Limiter(
     app=app,
     key_func=get_remote_address,
-    default_limits=[
-        f"{os.getenv('RATE_LIMIT_PER_MINUTE', '10')} per minute",
-        "200 per day"
-    ]
+    default_limits=["10 per minute"]
 )
 
 # 创建日本语言的 Faker 实例
 fake_jp = Faker(['ja_JP'])
 fake_en = Faker(['en_US'])
 
-# 在文件开头添加转换器���例
+# 在文件开头添加转换器实例
 kks = pykakasi.Kakasi()
 
 # 定义日本地区数据
@@ -199,7 +192,7 @@ JAPAN_REGIONS = {
     "兵庫県": {
         "code": "28",
         "cities": {
-            "神戸市中��区": {
+            "神戸市中央区": {
                 "zip_codes": ["650-0001", "650-0002", "650-0003", "650-0004"],
                 "phone_area_code": "078",
                 "areas": ["元町", "三宮", "北野", "港島中町", "浜辺通"],
@@ -228,7 +221,7 @@ JAPAN_REGIONS = {
             "川越市": {
                 "zip_codes": ["350-0001", "350-0002", "350-0003"],
                 "phone_area_code": "049",
-                "areas": ["小仙波", "郭町", "菅原�", "連雀町", "元町"],
+                "areas": ["小仙波", "郭町", "菅原町", "連雀町", "元町"],
                 "en_name": "Kawagoe-shi",
                 "cn_name": "川越市"
             }
@@ -297,7 +290,7 @@ def generate_japanese_info():
         
         prefecture = random.choice(list(JAPAN_REGIONS.keys()))
         if not prefecture:
-            raise ValueError("无法获��有效的都道府县")
+            raise ValueError("无法获取有效的都道府县")
             
         # 优化地址生成逻辑
         def generate_address(prefecture, city, area, block, house, room=None):
@@ -516,22 +509,19 @@ def home():
         }
     })
 
-# 添加全局错误处理
+# 简化错误处理
 @app.errorhandler(Exception)
 def handle_error(error):
-    status_code = 500
-    if hasattr(error, 'code'):
-        status_code = error.code
     return jsonify({
         "error": str(error),
-        "status_code": status_code
-    }), status_code
+        "status_code": 500
+    }), 500
 
-# 移除或修改日志配置（因为 Vercel 是无服务器环境）
-# 可以用 Vercel 的日志系统替代
+# 移除或简化日志配置
 def setup_logging():
     app.logger.setLevel(logging.INFO)
 
 # 移除主程序入口的环境判断
 if __name__ == "__main__":
     app.run()
+
